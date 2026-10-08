@@ -1,6 +1,10 @@
 # Dependencies
 node_modules/
 
+# Python cache files
+__pycache__/
+*.py[cod]
+
 # Build output
 dist/
 build/
@@ -26,4 +30,3 @@ pnpm-debug.log*
 # Operating system files
 .DS_Store
 Thumbs.db
-
