@@ -165,6 +165,24 @@ nav button span {
 nav button:hover {
   border-color: #77856b;
 }
+.city-identity {
+  align-items: center;
+  background: #242b22;
+  border-radius: 30px;
+  color: white;
+  display: inline-flex;
+  gap: 8px;
+  margin: 4px 0 32px;
+  padding: 11px 19px;
+}
+.city-identity strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+.city-identity > span:last-child {
+  font-size: 9px;
+  opacity: 0.62;
+}
 .workspace {
   display: grid;
   grid-template-columns: 320px 1fr;
@@ -193,7 +211,8 @@ label {
   font-weight: 600;
   margin-bottom: 10px;
 }
-select {
+select,
+input[type="text"] {
   border: 1px solid #d8ddcf;
   background: #fafbf8;
   width: 100%;
@@ -202,10 +221,79 @@ select {
   color: #343a2c;
   font-size: 14px;
 }
-.stop-detail {
-  color: #818777;
+input[type="text"][aria-invalid="true"] {
+  border-color: #ad5547;
+  box-shadow: 0 0 0 2px #ad554722;
+}
+.location-field {
+  position: relative;
+}
+.suggestions {
+  background: white;
+  border: 1px solid #d8ddcf;
+  border-radius: 9px;
+  box-shadow: 0 12px 30px #2932221f;
+  left: 0;
+  max-height: 230px;
+  overflow-y: auto;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 5px);
+  z-index: 10;
+}
+.suggestions button {
+  background: white;
+  border: 0;
+  border-bottom: 1px solid #edf0e8;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 12px;
+  text-align: left;
+  width: 100%;
+}
+.suggestions button:last-child {
+  border-bottom: 0;
+}
+.suggestions button:hover,
+.suggestions button.active {
+  background: #f0f5e8;
+}
+.suggestions button strong {
   font-size: 12px;
-  margin: 9px 0 32px;
+  font-weight: 600;
+}
+.suggestions button small {
+  color: #818777;
+  font-size: 10px;
+  text-transform: capitalize;
+}
+.suggestion-message {
+  color: #737c69;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 12px;
+}
+.destination-label {
+  margin-top: 16px;
+}
+.plan-button {
+  background: #242b22;
+  border: 1px solid #242b22;
+  border-radius: 9px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 14px 0 28px;
+  padding: 12px;
+  width: 100%;
+}
+.plan-button:hover {
+  background: #394235;
+}
+.plan-button:disabled {
+  cursor: wait;
+  opacity: 0.6;
 }
 .walk-label {
   display: flex;
@@ -557,6 +645,10 @@ input[type="checkbox"]:checked:before {
   line-height: 1.7;
   margin: 16px 2px;
 }
+.data-note a {
+  color: #667b46;
+  font-weight: 600;
+}
 .empty {
   padding: 24px;
   border: 1px dashed #ccd3c0;
@@ -680,6 +772,9 @@ dialog p {
   nav button {
     padding: 10px 14px;
   }
+  .city-identity {
+    margin-bottom: 22px;
+  }
   .workspace {
     grid-template-columns: 1fr;
     gap: 23px;
@@ -689,9 +784,6 @@ dialog p {
   }
   .trip-panel h2 {
     margin: 12px 0 18px;
-  }
-  .stop-detail {
-    margin-bottom: 20px;
   }
   .setup-foot {
     display: none;

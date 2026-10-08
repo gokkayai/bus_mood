@@ -1,60 +1,31 @@
-const cities = {
-  london: {
-    name: "London",
-    flag: "🇬🇧",
-    zone: "Europe/London",
-    stops: [["490005183E", "Balgonie Road", "Stop GA · Chingford · TfL buses"]],
-    routes: ["24", "29", "176"],
-    destinations: ["Hampstead Heath", "Wood Green", "Penge"],
+import {
+  VbbClient,
+  latestSafeDeparture,
+  normalizeJourneys,
+  uncertaintyMarginMinutes,
+} from "./transit.js";
+
+const BERLIN_ZONE = "Europe/Berlin";
+const DEFAULT_LOCATIONS = {
+  origin: {
+    type: "stop",
+    id: "900100003",
+    name: "S+U Alexanderplatz",
+    latitude: 52.521508,
+    longitude: 13.411267,
   },
-  berlin: {
-    name: "Berlin",
-    flag: "🇩🇪",
-    zone: "Europe/Berlin",
-    stops: [
-      ["alex", "Alexanderplatz", "Illustrative stop · Berlin"],
-      ["zoo", "Zoologischer Garten", "Illustrative stop · Berlin"],
-    ],
-    routes: ["100", "200", "M48"],
-    destinations: ["Zoologischer Garten", "Potsdamer Platz", "Zehlendorf"],
-  },
-  newyork: {
-    name: "New York",
-    flag: "🇺🇸",
-    zone: "America/New_York",
-    stops: [
-      ["times", "Times Square", "Illustrative stop · Manhattan"],
-      ["union", "Union Square", "Illustrative stop · Manhattan"],
-    ],
-    routes: ["M7", "M20", "M104"],
-    destinations: ["West Village", "South Ferry", "West Harlem"],
-  },
-  tokyo: {
-    name: "Tokyo",
-    flag: "🇯🇵",
-    zone: "Asia/Tokyo",
-    stops: [
-      ["shibuya", "Shibuya Station", "Illustrative stop · Tokyo"],
-      ["shinjuku", "Shinjuku Station", "Illustrative stop · Tokyo"],
-    ],
-    routes: ["01", "06", "58"],
-    destinations: ["Shimbashi Station", "Shinjuku Station", "Waseda"],
-  },
-  istanbul: {
-    name: "Istanbul",
-    flag: "🇹🇷",
-    zone: "Europe/Istanbul",
-    stops: [
-      ["taksim", "Taksim", "Illustrative stop · Istanbul"],
-      ["besiktas", "Beşiktaş", "Illustrative stop · Istanbul"],
-    ],
-    routes: ["40T", "42T", "DT1"],
-    destinations: ["İstinye", "Bahçeköy", "Ortaköy"],
+  destination: {
+    type: "stop",
+    id: "900023201",
+    name: "S+U Zoologischer Garten",
+    latitude: 52.507,
+    longitude: 13.3327,
   },
 };
+
 const $ = (id) => document.getElementById(id);
+const client = new VbbClient();
 const state = {
-  city: "london",
   demo: false,
   scenario: "late",
   walk: 5,
@@ -65,132 +36,143 @@ const state = {
   selected: null,
   loading: false,
   error: null,
+  warning: null,
   updated: 0,
+  cacheSource: null,
+  cacheAgeMs: 0,
   request: 0,
+  locations: structuredClone(DEFAULT_LOCATIONS),
+  suggestions: { origin: [], destination: [] },
 };
-let controller;
+
+let journeyController;
+const autocomplete = {
+  origin: { timer: null, controller: null, activeIndex: -1 },
+  destination: { timer: null, controller: null, activeIndex: -1 },
+};
+
 function text(id, value) {
   $(id).textContent = value;
 }
+
 function escapeHTML(value) {
   return String(value).replace(
     /[&<>"']/g,
-    (c) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
-        c
-      ],
+    (character) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[character],
   );
 }
-function cityTime(date) {
+
+function berlinTime(date) {
   return new Intl.DateTimeFormat("en-GB", {
-    timeZone: cities[state.city].zone,
+    timeZone: BERLIN_ZONE,
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
 }
-const confidenceQuantiles = {
-  0.9: 1.2815515655446004,
-  0.95: 1.6448536269514722,
-  0.99: 2.3263478740408408,
-};
+
 function uncertaintyMargin() {
-  const combinedStandardDeviation = Math.hypot(
+  return uncertaintyMarginMinutes(
+    state.confidence,
     state.busUncertainty,
     state.walkUncertainty,
   );
-  return confidenceQuantiles[state.confidence] * combinedStandardDeviation;
 }
-function latestSafeDeparture(row) {
-  return row.arrival - (state.walk + uncertaintyMargin()) * 60000;
+
+function safeDeparture(row) {
+  return latestSafeDeparture(
+    row.arrival,
+    state.walk,
+    state.confidence,
+    state.busUncertainty,
+    state.walkUncertainty,
+  );
 }
-function setCity(id) {
-  if (!cities[id]) throw Error("Unknown city");
-  state.city = id;
-  state.demo = id !== "london";
-  $("demo").checked = state.demo;
-  $("demo").disabled = id !== "london";
-  $("stop").innerHTML = cities[id].stops
-    .map((s) => `<option value="${s[0]}">${s[1]}</option>`)
-    .join("");
-  renderCities();
-  load();
-}
-function renderCities() {
-  $("cities").innerHTML = Object.entries(cities)
-    .map(
-      ([id, c]) =>
-        `<button data-city="${id}" class="${state.city === id ? "active" : ""}" aria-pressed="${state.city === id}">${c.flag} ${c.name}<span>${id === "london" ? "LIVE" : "DEMO"}</span></button>`,
-    )
-    .join("");
-}
+
 function makeDemo() {
-  const c = cities[state.city],
-    now = Date.now(),
-    mins =
-      state.scenario === "late"
-        ? [18, 25, 34]
-        : state.scenario === "early"
-          ? [6, 15, 23]
-          : [10, 19, 28];
-  return mins.map((m, i) => ({
-    id: "demo-" + i,
-    line: c.routes[i],
-    destination: c.destinations[i],
-    arrival: now + m * 60000,
-    delay: state.scenario === "late" ? 8 : state.scenario === "early" ? -3 : 0,
+  const now = Date.now();
+  const minutes =
+    state.scenario === "late"
+      ? [18, 25, 34]
+      : state.scenario === "early"
+        ? [6, 15, 23]
+        : [10, 19, 28];
+  const routes = ["100", "200", "M29"];
+  const destinations = [
+    "Zoologischer Garten",
+    "Michelangelostraße",
+    "Grunewald, Roseneck",
+  ];
+
+  return minutes.map((minute, index) => ({
+    id: `demo-${index}`,
+    line: routes[index],
+    destination: destinations[index],
+    departureStop: "S+U Alexanderplatz",
+    arrivalStop: destinations[index],
+    arrival: now + minute * 60_000,
+    departureTime: new Date(now + minute * 60_000).toISOString(),
+    plannedTime: new Date(now + minute * 60_000).toISOString(),
+    delayMinutes:
+      state.scenario === "late" ? 8 : state.scenario === "early" ? -3 : 0,
+    walkingMinutes: 5,
+    durationMinutes: 26 + index * 4,
+    realtime: true,
   }));
 }
+
 async function load() {
   const request = ++state.request;
-  controller?.abort();
-  controller = new AbortController();
+  journeyController?.abort();
+  journeyController = new AbortController();
   state.loading = true;
   state.error = null;
+  state.warning = null;
   state.rows = [];
   state.selected = null;
   render();
+
   try {
     if (state.demo) {
       state.rows = makeDemo();
+      state.cacheSource = "demo";
+      state.cacheAgeMs = 0;
     } else {
-      const timeout = setTimeout(() => controller.abort(), 12000);
-      let data;
-      try {
-        const response = await fetch(
-          `https://api.tfl.gov.uk/StopPoint/${encodeURIComponent($("stop").value)}/Arrivals`,
-          { signal: controller.signal },
+      if (!state.locations.origin || !state.locations.destination) {
+        throw new Error(
+          "Choose a suggestion for both the starting point and destination",
         );
-        if (!response.ok) throw Error("Feed unavailable");
-        data = await response.json();
-      } finally {
-        clearTimeout(timeout);
       }
+      const result = await client.journeys(
+        state.locations.origin,
+        state.locations.destination,
+        { signal: journeyController.signal },
+      );
       if (request !== state.request) return;
-      if (!Array.isArray(data)) throw Error("Unexpected feed");
-      state.rows = data
-        .filter(
-          (r) =>
-            r.modeName === "bus" &&
-            Number.isFinite(Date.parse(r.expectedArrival)),
-        )
-        .map((r) => ({
-          id: r.id,
-          line: r.lineName,
-          destination:
-            r.destinationName || r.towards || "Destination not supplied",
-          arrival: Date.parse(r.expectedArrival),
-          delay: null,
-        }))
-        .filter((r) => r.arrival > Date.now())
-        .sort((a, b) => a.arrival - b.arrival)
-        .slice(0, 6);
+      state.rows = normalizeJourneys(result.payload)
+        .filter((row) => row.arrival > Date.now())
+        .sort((left, right) => left.arrival - right.arrival)
+        .slice(0, 4);
+      if (!state.rows.length) {
+        throw new Error("No upcoming bus-only journeys were found");
+      }
+      state.cacheSource = result.source;
+      state.cacheAgeMs = result.ageMs;
+      state.warning = result.warning || null;
     }
+
     state.selected = state.rows[0]?.id;
+    useRouteWalkingTime(state.rows[0]);
     state.updated = Date.now();
-  } catch (e) {
-    if (request !== state.request) return;
-    state.error =
-      "We couldn’t reach TfL. Try refreshing, or switch on demo mode to take a look around.";
+  } catch (error) {
+    if (request !== state.request || error.name === "AbortError") return;
+    state.error = `${error.message}. Try again or switch on demo data.`;
     state.rows = [];
   } finally {
     if (request === state.request) {
@@ -199,68 +181,100 @@ async function load() {
     }
   }
 }
+
+function useRouteWalkingTime(row) {
+  if (!Number.isFinite(row?.walkingMinutes)) return;
+  state.walk = Math.min(30, Math.max(0, Math.ceil(row.walkingMinutes)));
+  $("walk").value = state.walk;
+}
+
 function advice(row, now = Date.now()) {
-  const minutes = (row.arrival - now) / 60000,
-    left = (latestSafeDeparture(row) - now) / 60000;
-  if (minutes <= 0)
+  const minutes = (row.arrival - now) / 60_000;
+  const timeUntilSafeDeparture = (safeDeparture(row) - now) / 60_000;
+  if (minutes <= 0) {
     return {
       title: "That ship has sailed.",
-      copy: "Well, bus. Pick the next departure. There’s always another plot twist.",
-      tag: "THIS PREDICTION HAS PASSED",
+      copy: "Well, bus. Pick the next journey. There’s always another plot twist.",
+      tag: "THIS DEPARTURE HAS PASSED",
       symbol: "oops",
       className: "missed",
       leave: "Pick another",
     };
-  if (left < 0)
+  }
+  if (timeUntilSafeDeparture < 0) {
     return {
       title: "This one’s a stretch.",
-      copy: "Your walk is longer than the time left. The next bus is probably your better bet.",
+      copy: "Your walk and safety margin need more time. The next bus is probably the better bet.",
       tag: "LET’S NOT MAKE THIS A CHASE SCENE",
       symbol: "…",
       className: "missed",
       leave: "Too tight",
     };
-  if (left <= 2)
+  }
+  if (timeUntilSafeDeparture <= 2) {
     return {
       title: "RUN! (Okay, walk.)",
       copy: "Shoes on. Phone away. Your bus is making an entrance. Please cross roads safely.",
       tag:
-        row.delay < 0
+        row.delayMinutes < 0
           ? "EARLY BUS. MAIN CHARACTER ENERGY."
           : "THIS IS YOUR CUE",
       symbol: "!",
       className: "urgent",
       leave: "Now",
     };
-  if (left > 8)
+  }
+  if (timeUntilSafeDeparture > 8) {
     return {
       title: "Keep snoozing.",
       copy:
-        row.delay > 0
-          ? "Your bus is fashionably late. You, however, can be comfortably horizontal."
+        row.delayMinutes > 0
+          ? "Your bus is fashionably late. You can be comfortably horizontal."
           : "There’s time to finish your coffee. Your bus isn’t ready for you yet.",
       tag:
-        row.delay > 0
+        row.delayMinutes > 0
           ? "YOUR BUS IS TAKING ITS SWEET TIME"
           : "YOU HAVE A LITTLE TIME",
       symbol: "z z",
       className: "",
-      leave: Math.floor(left) + " min",
+      leave: `${Math.floor(timeUntilSafeDeparture)} min`,
     };
+  }
   return {
     title: "Time to find your shoes.",
     copy: "A little breathing room. Wrap up what you’re doing and get ready to head out.",
     tag: "A RARE MOMENT OF GOOD TIMING",
     symbol: ":)",
     className: "",
-    leave: Math.floor(left) + " min",
+    leave: `${Math.floor(timeUntilSafeDeparture)} min`,
   };
 }
+
+function sourceLabel() {
+  if (state.demo) return "DEMO DATA";
+  if (state.loading) return "CONNECTING";
+  if (state.error) return "DATA UNAVAILABLE";
+  if (state.cacheSource === "stale") return "STALE CACHE · VBB";
+  if (state.cacheSource === "cache") return "CACHED · VBB";
+  return "VBB · COMMUNITY API";
+}
+
+function updatedLabel() {
+  if (state.loading) return "Checking Berlin journeys…";
+  if (state.error) return "No journey data";
+  if (state.demo) return "Fictional departures";
+  if (state.cacheSource === "stale") {
+    return `Cached ${Math.ceil(state.cacheAgeMs / 1000)} sec ago`;
+  }
+  if (state.cacheSource === "cache") {
+    return `Reused ${Math.ceil(state.cacheAgeMs / 1000)} sec cache`;
+  }
+  return `Updated ${berlinTime(new Date(state.updated))}`;
+}
+
 function render() {
-  const c = cities[state.city],
-    row = state.rows.find((r) => r.id === state.selected);
-  text("clock", cityTime(new Date()));
-  text("timezone", c.name.toUpperCase() + " LOCAL TIME");
+  const row = state.rows.find((item) => item.id === state.selected);
+  text("clock", berlinTime(new Date()));
   text("walkValue", state.walk);
   text("busUncertaintyValue", state.busUncertainty);
   text("walkUncertaintyValue", state.walkUncertainty);
@@ -269,45 +283,28 @@ function render() {
     "probabilitySummary",
     `Adds a ${uncertaintyMargin().toFixed(1)} min uncertainty margin to your ${state.walk} min walk.`,
   );
-  text("stopDetail", c.stops.find((s) => s[0] === $("stop").value)?.[2] || "");
   $("scenarios").hidden = !state.demo;
-  document.querySelectorAll("[data-scenario]").forEach((b) => {
-    b.classList.toggle("active", b.dataset.scenario === state.scenario);
-    b.setAttribute("aria-pressed", b.dataset.scenario === state.scenario);
+  document.querySelectorAll("[data-scenario]").forEach((button) => {
+    const active = button.dataset.scenario === state.scenario;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", active);
   });
   $("refresh").disabled = state.loading;
-  text(
-    "sourceBadge",
-    state.demo
-      ? "DEMO DATA"
-      : state.loading
-        ? "CONNECTING"
-        : state.error
-          ? "FEED UNAVAILABLE"
-          : "LIVE · TFL",
-  );
-  text(
-    "updated",
-    state.loading
-      ? "Checking departures…"
-      : state.demo
-        ? "Fictional departures"
-        : state.error
-          ? "No live predictions"
-          : `Updated ${cityTime(new Date(state.updated))}`,
-  );
-  const a = row
+  $("planTrip").disabled = state.loading;
+  text("sourceBadge", sourceLabel());
+  text("updated", updatedLabel());
+
+  const mood = row
     ? advice(row)
     : {
         title: state.loading
           ? "One moment."
           : state.error
-            ? "Your bus is off the grid."
+            ? "Berlin is off the grid."
             : "A quiet moment.",
         copy: state.loading
-          ? "Asking your bus about its plans."
-          : state.error ||
-            "No upcoming bus predictions for this stop. Refresh in a moment.",
+          ? "Asking Berlin about its bus plans."
+          : state.error || "No upcoming bus journeys to display.",
         tag: state.loading
           ? "LET’S CHECK ON YOUR BUS"
           : "NO DEPARTURE ADVICE AVAILABLE",
@@ -315,13 +312,14 @@ function render() {
         className: "unavailable",
         leave: "—",
       };
-  $("moodCard").className = "mood-card " + a.className;
-  text("moodTitle", a.title);
-  text("moodCopy", a.copy);
-  text("moodTag", a.tag);
-  text("moodSymbol", a.symbol);
-  text("leaveTime", a.leave);
-  text("leaveLabel", a.leave === "Now" ? "LEAVE" : "LEAVE IN");
+
+  $("moodCard").className = `mood-card ${mood.className}`;
+  text("moodTitle", mood.title);
+  text("moodCopy", mood.copy);
+  text("moodTag", mood.tag);
+  text("moodSymbol", mood.symbol);
+  text("leaveTime", mood.leave);
+  text("leaveLabel", mood.leave === "Now" ? "LEAVE" : "LEAVE IN");
   text(
     "confidenceResult",
     `${Math.round(state.confidence * 100)}% CATCH TARGET`,
@@ -329,62 +327,207 @@ function render() {
   text(
     "marginResult",
     row
-      ? `${uncertaintyMargin().toFixed(1)} MIN UNCERTAINTY MARGIN · LEAVE BY ${cityTime(new Date(latestSafeDeparture(row)))}`
+      ? `${uncertaintyMargin().toFixed(1)} MIN UNCERTAINTY MARGIN · LEAVE BY ${berlinTime(new Date(safeDeparture(row)))}`
       : `${uncertaintyMargin().toFixed(1)} MIN UNCERTAINTY MARGIN`,
   );
-  text("selectedRoute", row ? `BUS ${row.line} · EXPECTED` : "YOUR NEXT RIDE");
-  text("arrivalTime", row ? cityTime(new Date(row.arrival)) : "—");
+  text(
+    "selectedRoute",
+    row
+      ? `BUS ${row.line} · ${row.realtime ? "REALTIME" : "SCHEDULED"}`
+      : "YOUR NEXT RIDE",
+  );
+  text("arrivalTime", row ? berlinTime(new Date(row.arrival)) : "—");
+
   $("departures").innerHTML = state.rows.length
     ? state.rows
-        .map((r) => {
-          const min = Math.max(0, Math.ceil((r.arrival - Date.now()) / 60000));
-          return `<button class="departure ${state.selected === r.id ? "selected" : ""}" data-ride="${escapeHTML(r.id)}" aria-pressed="${state.selected === r.id}"><span class="route">${escapeHTML(r.line)}</span><span class="route-info"><strong>${escapeHTML(r.destination)}</strong><small>${state.demo ? "Demo journey" : "Arrival prediction"} · ${cityTime(new Date(r.arrival))}</small></span><span class="eta"><strong>${min === 0 ? "Due" : min + " min"}</strong><small>${r.delay === null ? "TfL prediction" : r.delay > 0 ? "+" + r.delay + " min late" : r.delay < 0 ? Math.abs(r.delay) + " min early" : "On time"}</small></span></button>`;
+        .map((departure) => {
+          const minutes = Math.max(
+            0,
+            Math.ceil((departure.arrival - Date.now()) / 60_000),
+          );
+          const timing = departure.realtime
+            ? departure.delayMinutes > 0
+              ? `Live · +${departure.delayMinutes} min`
+              : departure.delayMinutes < 0
+                ? `Live · ${Math.abs(departure.delayMinutes)} min early`
+                : "Live · on time"
+            : "Scheduled time";
+          return `<button class="departure ${state.selected === departure.id ? "selected" : ""}" data-ride="${escapeHTML(departure.id)}" aria-pressed="${state.selected === departure.id}"><span class="route">${escapeHTML(departure.line)}</span><span class="route-info"><strong>${escapeHTML(departure.destination)}</strong><small>${escapeHTML(departure.departureStop)} · ${berlinTime(new Date(departure.arrival))}</small></span><span class="eta"><strong>${minutes === 0 ? "Due" : `${minutes} min`}</strong><small>${timing}</small></span></button>`;
         })
         .join("")
-    : `<div class="empty">${state.loading ? "Looking down the road…" : state.error ? "Live arrivals unavailable. Refresh or try the demo switch." : "No arrivals to display right now."}</div>`;
-  text(
-    "dataNote",
-    state.demo
-      ? `Demo mode · Fictional routes and timings. The ${Math.round(state.confidence * 100)}% plan uses a ${uncertaintyMargin().toFixed(1)} min uncertainty margin. Not for travel planning.`
-      : `Powered by Transport for London open data · Refreshes every 30 sec. ${state.updated && Date.now() - state.updated > 60000 ? "Predictions may be stale. " : ""}The ${Math.round(state.confidence * 100)}% plan includes your ${state.walk} min walk + a ${uncertaintyMargin().toFixed(1)} min uncertainty margin.`,
-  );
+    : `<div class="empty">${state.loading ? "Looking down the road…" : state.error ? "Berlin journey data is unavailable. Retry or use demo data." : "No journeys to display right now."}</div>`;
+
+  const cacheNotice =
+    state.cacheSource === "stale"
+      ? ` Showing ${Math.ceil(state.cacheAgeMs / 1000)}-second-old cached results because the live service failed.`
+      : state.cacheSource === "cache"
+        ? " Reused a recent response to reduce API traffic."
+        : "";
+  $("dataNote").innerHTML = state.demo
+    ? `Demo mode · Fictional routes and timings. The ${Math.round(state.confidence * 100)}% plan uses a ${uncertaintyMargin().toFixed(1)} min uncertainty margin. Not for travel planning.`
+    : `Journey data via <a href="https://v6.vbb.transport.rest/" target="_blank" rel="noopener">vbb.transport.rest</a>, a community-operated interface for VBB data. Times may be realtime or scheduled.${cacheNotice}`;
 }
-$("cities").addEventListener("click", (e) => {
-  const b = e.target.closest("[data-city]");
-  if (b) setCity(b.dataset.city);
-});
-$("stop").addEventListener("change", load);
-$("walk").addEventListener("input", (e) => {
-  state.walk = Number(e.target.value);
-  render();
-});
-$("confidence").addEventListener("change", (e) => {
-  state.confidence = Number(e.target.value);
-  render();
-});
-$("busUncertainty").addEventListener("input", (e) => {
-  state.busUncertainty = Number(e.target.value);
-  render();
-});
-$("walkUncertainty").addEventListener("input", (e) => {
-  state.walkUncertainty = Number(e.target.value);
-  render();
-});
-$("demo").addEventListener("change", (e) => {
-  state.demo = e.target.checked;
+
+function renderSuggestions(field, message = "") {
+  const input = $(field);
+  const list = $(`${field}Suggestions`);
+  const suggestions = state.suggestions[field];
+  autocomplete[field].activeIndex = -1;
+  if (message) {
+    list.innerHTML = `<p class="suggestion-message">${escapeHTML(message)}</p>`;
+  } else {
+    list.innerHTML = suggestions
+      .map(
+        (location, index) =>
+          `<button type="button" role="option" aria-selected="false" data-location-index="${index}"><strong>${escapeHTML(location.name)}</strong><small>${escapeHTML(location.type)}</small></button>`,
+      )
+      .join("");
+  }
+  const visible = Boolean(message || suggestions.length);
+  list.hidden = !visible;
+  input.setAttribute("aria-expanded", String(visible));
+}
+
+function selectLocation(field, location) {
+  state.locations[field] = location;
+  $(field).value = location.name;
+  $(field).removeAttribute("aria-invalid");
+  state.suggestions[field] = [];
+  renderSuggestions(field);
+}
+
+function setupAutocomplete(field) {
+  const input = $(field);
+  const list = $(`${field}Suggestions`);
+  const controls = autocomplete[field];
+
+  input.addEventListener("input", () => {
+    state.locations[field] = null;
+    input.removeAttribute("aria-invalid");
+    clearTimeout(controls.timer);
+    controls.controller?.abort();
+    const query = input.value.trim();
+    if (query.length < 3) {
+      state.suggestions[field] = [];
+      renderSuggestions(field);
+      return;
+    }
+    controls.timer = setTimeout(async () => {
+      controls.controller = new AbortController();
+      renderSuggestions(field, "Searching Berlin…");
+      try {
+        state.suggestions[field] = await client.searchLocations(query, {
+          signal: controls.controller.signal,
+        });
+        renderSuggestions(
+          field,
+          state.suggestions[field].length ? "" : "No matching place found",
+        );
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          state.suggestions[field] = [];
+          renderSuggestions(field, "Location search is unavailable");
+        }
+      }
+    }, 300);
+  });
+
+  list.addEventListener("click", (event) => {
+    const option = event.target.closest("[data-location-index]");
+    if (!option) return;
+    selectLocation(
+      field,
+      state.suggestions[field][Number(option.dataset.locationIndex)],
+    );
+  });
+
+  input.addEventListener("keydown", (event) => {
+    const options = [...list.querySelectorAll("[role=option]")];
+    if (event.key === "Escape") {
+      state.suggestions[field] = [];
+      renderSuggestions(field);
+      return;
+    }
+    if (
+      (event.key === "ArrowDown" || event.key === "ArrowUp") &&
+      options.length
+    ) {
+      event.preventDefault();
+      const step = event.key === "ArrowDown" ? 1 : -1;
+      controls.activeIndex =
+        (controls.activeIndex + step + options.length) % options.length;
+      options.forEach((option, index) => {
+        const active = index === controls.activeIndex;
+        option.setAttribute("aria-selected", String(active));
+        option.classList.toggle("active", active);
+      });
+      options[controls.activeIndex].scrollIntoView({ block: "nearest" });
+      return;
+    }
+    if (event.key === "Enter") {
+      event.preventDefault();
+      if (
+        controls.activeIndex >= 0 &&
+        state.suggestions[field][controls.activeIndex]
+      ) {
+        selectLocation(field, state.suggestions[field][controls.activeIndex]);
+      } else if (state.locations.origin && state.locations.destination) {
+        load();
+      }
+    }
+  });
+
+  input.addEventListener("blur", () => {
+    setTimeout(() => {
+      state.suggestions[field] = [];
+      renderSuggestions(field);
+    }, 150);
+  });
+}
+
+$("origin").value = DEFAULT_LOCATIONS.origin.name;
+$("destination").value = DEFAULT_LOCATIONS.destination.name;
+setupAutocomplete("origin");
+setupAutocomplete("destination");
+
+$("planTrip").addEventListener("click", () => {
+  ["origin", "destination"].forEach((field) => {
+    if (!state.locations[field]) $(field).setAttribute("aria-invalid", "true");
+  });
   load();
 });
-$("scenarios").addEventListener("click", (e) => {
-  const b = e.target.closest("[data-scenario]");
-  if (b) {
-    state.scenario = b.dataset.scenario;
+$("walk").addEventListener("input", (event) => {
+  state.walk = Number(event.target.value);
+  render();
+});
+$("confidence").addEventListener("change", (event) => {
+  state.confidence = Number(event.target.value);
+  render();
+});
+$("busUncertainty").addEventListener("input", (event) => {
+  state.busUncertainty = Number(event.target.value);
+  render();
+});
+$("walkUncertainty").addEventListener("input", (event) => {
+  state.walkUncertainty = Number(event.target.value);
+  render();
+});
+$("demo").addEventListener("change", (event) => {
+  state.demo = event.target.checked;
+  load();
+});
+$("scenarios").addEventListener("click", (event) => {
+  const button = event.target.closest("[data-scenario]");
+  if (button) {
+    state.scenario = button.dataset.scenario;
     load();
   }
 });
-$("departures").addEventListener("click", (e) => {
-  const b = e.target.closest("[data-ride]");
-  if (b) {
-    state.selected = b.dataset.ride;
+$("departures").addEventListener("click", (event) => {
+  const button = event.target.closest("[data-ride]");
+  if (button) {
+    state.selected = button.dataset.ride;
+    useRouteWalkingTime(state.rows.find((row) => row.id === state.selected));
     render();
   }
 });
@@ -393,73 +536,25 @@ $("refresh").addEventListener("click", load);
   $(id).addEventListener("click", () => $("about").showModal()),
 );
 $("closeAbout").addEventListener("click", () => $("about").close());
-$("about").addEventListener("click", (e) => {
-  if (e.target === $("about")) {
-    const r = $("about").getBoundingClientRect();
+$("about").addEventListener("click", (event) => {
+  if (event.target === $("about")) {
+    const rectangle = $("about").getBoundingClientRect();
     if (
-      e.clientX < r.left ||
-      e.clientX > r.right ||
-      e.clientY < r.top ||
-      e.clientY > r.bottom
-    )
+      event.clientX < rectangle.left ||
+      event.clientX > rectangle.right ||
+      event.clientY < rectangle.top ||
+      event.clientY > rectangle.bottom
+    ) {
       $("about").close();
+    }
   }
 });
+
 setInterval(() => {
   if (!document.hidden && !state.loading) render();
-}, 10000);
+}, 10_000);
 setInterval(() => {
   if (!document.hidden && !state.demo && !state.loading) load();
-}, 30000);
-document.addEventListener("visibilitychange", () => {
-  if (!document.hidden && !state.demo && !state.loading) load();
-});
-setCity("london");
-if (document.modelContext?.registerTool) {
-  try {
-    Promise.resolve(
-      document.modelContext.registerTool({
-        name: "configure_bus_mood",
-        description:
-          "Choose a city and walking time, and load its departures. Cities other than London use demo data.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            city: { type: "string", enum: Object.keys(cities) },
-            walkingMinutes: { type: "integer", minimum: 1, maximum: 20 },
-          },
-          required: ["city", "walkingMinutes"],
-          additionalProperties: false,
-        },
-        annotations: { readOnlyHint: false },
-        execute: async (input) => {
-          if (
-            !cities[input.city] ||
-            !Number.isInteger(input.walkingMinutes) ||
-            input.walkingMinutes < 1 ||
-            input.walkingMinutes > 20
-          )
-            throw Error("Invalid city or walking time");
-          state.walk = input.walkingMinutes;
-          $("walk").value = state.walk;
-          state.city = input.city;
-          state.demo = input.city !== "london";
-          $("demo").checked = state.demo;
-          $("demo").disabled = input.city !== "london";
-          $("stop").innerHTML = cities[input.city].stops
-            .map((s) => `<option value="${s[0]}">${s[1]}</option>`)
-            .join("");
-          renderCities();
-          await load();
-          return {
-            city: state.city,
-            demo: state.demo,
-            walkingMinutes: state.walk,
-            departures: state.rows.length,
-            error: state.error,
-          };
-        },
-      }),
-    ).catch(() => {});
-  } catch {}
-}
+}, 60_000);
+
+load();

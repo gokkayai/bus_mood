@@ -6,7 +6,7 @@
     <title>Bus Mood — Less waiting. More living.</title>
     <meta
       name="description"
-      content="A slightly dramatic departure companion. Live London bus arrivals and playful city demos."
+      content="A probability-aware companion for live Berlin bus journeys."
     />
     <link
       rel="icon"
@@ -39,23 +39,65 @@
           </div>
           <div class="local-time">
             <span id="clock">--:--</span
-            ><span id="timezone">LONDON LOCAL TIME</span>
+            ><span id="timezone">BERLIN LOCAL TIME</span>
           </div>
         </div>
-        <nav id="cities" aria-label="Choose a city"></nav>
+        <div class="city-identity" aria-label="Coverage area">
+          <span aria-hidden="true">🇩🇪</span>
+          <strong>Berlin</strong>
+          <span>LIVE VBB DATA</span>
+        </div>
         <div class="workspace">
           <section class="trip-panel">
             <div class="section-label">
               <span>01 / YOUR SETUP</span><span>↗</span>
             </div>
             <h2>Where’s your ride?</h2>
-            <label for="stop">Bus stop</label
-            ><select id="stop"></select>
-            <div class="stop-detail" id="stopDetail"></div>
+            <label for="origin">Starting point</label>
+            <div class="location-field">
+              <input
+                id="origin"
+                type="text"
+                role="combobox"
+                autocomplete="off"
+                aria-autocomplete="list"
+                aria-controls="originSuggestions"
+                aria-expanded="false"
+                placeholder="Stop, address or landmark"
+              />
+              <div
+                id="originSuggestions"
+                class="suggestions"
+                role="listbox"
+                hidden
+              ></div>
+            </div>
+            <label for="destination" class="destination-label"
+              >Destination</label
+            >
+            <div class="location-field">
+              <input
+                id="destination"
+                type="text"
+                role="combobox"
+                autocomplete="off"
+                aria-autocomplete="list"
+                aria-controls="destinationSuggestions"
+                aria-expanded="false"
+                placeholder="Stop, address or landmark"
+              />
+              <div
+                id="destinationSuggestions"
+                class="suggestions"
+                role="listbox"
+                hidden
+              ></div>
+            </div>
+            <button id="planTrip" class="plan-button">Find Berlin buses</button>
             <label for="walk" class="walk-label"
-              >Walk to the stop
+              >Journey walking estimate
               <strong><output id="walkValue">5</output> min</strong></label
-            ><input id="walk" type="range" min="1" max="20" value="5" />
+            ><input id="walk" type="range" min="0" max="30" value="5" />
             <div class="range-labels">
               <span>Around the corner</span><span>A little trek</span>
             </div>
@@ -110,7 +152,7 @@
               </div>
             </div>
             <div class="mode-row">
-              <label for="demo">Try demo mode</label
+              <label for="demo">Use demo data</label
               ><input id="demo" type="checkbox" role="switch" />
             </div>
             <div id="scenarios" hidden>
@@ -160,7 +202,7 @@
               </div>
             </article>
             <div class="departure-title">
-              <h2>Coming to your stop</h2>
+              <h2>Bus options in Berlin</h2>
               <span>Pick your ride</span>
             </div>
             <div id="departures" class="departures"></div>
@@ -178,24 +220,21 @@
       <div class="eyebrow">HONEST DATA. DRAMATIC DELIVERY.</div>
       <h2>A quick reality check.</h2>
       <p>
-        London uses live arrival predictions from
-        <a
-          href="https://tfl.gov.uk/info-for/open-data-users/"
-          target="_blank"
-          rel="noopener"
-          >Transport for London</a
-        >. Predictions can change; this is not a guarantee you’ll catch your
-        bus.
+        Berlin journey options come from
+        <a href="https://v6.vbb.transport.rest/" target="_blank" rel="noopener"
+          >vbb.transport.rest</a
+        >, a community-operated interface for VBB transport data. It is free to
+        use but its availability is controlled by a third party.
       </p>
       <p>
-        Berlin, New York, Tokyo and Istanbul are interactive demos with
-        fictional departures. London also has a demo switch. Demo data is always
-        labeled.
+        The locations you enter are sent directly from this browser to that
+        service. Search results are cached only for this browser tab’s session.
+        Demo mode remains available and is always labeled.
       </p>
       <p>
-        TfL arrival predictions do not provide a scheduled-time comparison here,
-        so we never call a live bus “early” or “late.” Those scenarios are
-        available in demo mode.
+        VBB responses may mix realtime predictions with scheduled fallback.
+        Every journey is labeled so scheduled information is not presented as
+        live data.
       </p>
       <p>
         Departure advice uses uncertain bus arrivals and walking times. It picks
@@ -204,8 +243,11 @@
         These probabilities depend on the assumptions you choose and are not
         guarantees. “RUN!” is a joke, not a reason to cross a road unsafely.
       </p>
-      <p>This app is not affiliated with Google Maps or any transit agency.</p>
+      <p>
+        Data attribution: Verkehrsverbund Berlin-Brandenburg (VBB). This app is
+        not affiliated with VBB or transport.rest.
+      </p>
     </dialog>
-    <script src="app.js" defer></script>
+    <script src="app.js" type="module"></script>
   </body>
 </html>
