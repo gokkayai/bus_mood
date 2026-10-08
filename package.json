@@ -1,0 +1,8 @@
+{
+  "name": "bus-mood",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test_transit.mjs"
+  }
+}
