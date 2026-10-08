@@ -1,2 +1,676 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-:root{font-family:'DM Sans',sans-serif;color:#222623;background:#f7f8f5;font-synthesis:none}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button,a,input,select{-webkit-tap-highlight-color:transparent}button{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #547928;outline-offset:4px}button{color:inherit}a{color:inherit}.shell{max-width:1320px;margin:auto;padding:0 52px}header{height:98px;border-bottom:1px solid #dedfd9;display:flex;align-items:center;gap:16px}.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 26px 'Space Grotesk',sans-serif;letter-spacing:-1.3px}.brand-icon{background:#cdf564;border:1.5px solid #252a23;border-radius:12px;width:39px;height:39px;text-align:center;line-height:34px;font-size:32px}.beta{font:600 10px 'DM Sans';letter-spacing:1px;border:1px solid #c9cec1;padding:4px 6px;border-radius:4px;margin:0 0 10px 5px}.header-note{margin-left:auto;color:#73786e;font-size:14px}.icon-button{border:1px solid #cbd0c5;border-radius:50%;width:26px;height:26px;background:transparent;font-size:15px;margin-left:18px}.intro{display:flex;justify-content:space-between;align-items:center;margin:47px 0 30px}.eyebrow,.section-label{font-size:12px;font-weight:700;letter-spacing:1.5px;color:#717769}h1,h2,p{margin:0}h1{font:600 clamp(28px,3.1vw,43px)/1.2 'Space Grotesk',sans-serif;letter-spacing:-1.9px;margin:12px 0}.intro p{color:#777c73;font-size:16px}.local-time{text-align:right;display:flex;flex-direction:column;gap:7px}.local-time>span:first-child{font:500 30px 'Space Grotesk';letter-spacing:-1px}.local-time>span:last-child{font-size:10px;font-weight:600;letter-spacing:1.2px;color:#7a8073}nav{display:flex;gap:10px;margin-bottom:32px;overflow:auto;padding:4px 0}nav button{white-space:nowrap;border:1px solid #dce0d5;background:#fff;padding:11px 19px;border-radius:30px;font-size:14px}nav button.active{background:#242b22;color:white;border-color:#242b22}nav button span{font-size:10px;opacity:.6;margin-left:8px}nav button:hover{border-color:#77856b}.workspace{display:grid;grid-template-columns:320px 1fr;gap:30px;align-items:start}.trip-panel{border:1px solid #dce0d5;border-radius:18px;background:white;padding:26px}.section-label{display:flex;justify-content:space-between;font-size:10px}.trip-panel h2{font:600 24px 'Space Grotesk';letter-spacing:-.8px;margin:21px 0 27px}label{display:block;font-size:14px;font-weight:600;margin-bottom:10px}select{border:1px solid #d8ddcf;background:#fafbf8;width:100%;border-radius:9px;padding:13px 10px;color:#343a2c;font-size:14px}.stop-detail{color:#818777;font-size:12px;margin:9px 0 32px}.walk-label{display:flex;justify-content:space-between;align-items:center}.walk-label strong{font-size:13px;background:#f0f4e8;padding:5px 8px;border-radius:5px}input[type=range]{width:100%;accent-color:#657948;margin:12px 0}.range-labels{display:flex;justify-content:space-between;font-size:11px;color:#818777}.buffer{display:flex;gap:10px;background:#f6f8f0;border-radius:10px;padding:14px 12px;margin-top:25px}.buffer>span{font-size:24px;color:#647447}.buffer strong{font-size:12px}.buffer p{font-size:12px;line-height:1.65;color:#7b826f;margin-top:5px}.mode-row{border-top:1px solid #e7eadf;display:flex;justify-content:space-between;align-items:center;padding-top:24px;margin-top:24px}.mode-row label{margin:0;font-size:13px}input[type=checkbox]{appearance:none;width:34px;height:20px;background:#d5dacd;border-radius:15px;position:relative;cursor:pointer}input[type=checkbox]:before{content:'';width:14px;height:14px;background:white;border-radius:50%;position:absolute;top:3px;left:3px;transition:.2s}input[type=checkbox]:checked{background:#5d742d}input[type=checkbox]:checked:before{left:17px}.small{font-size:12px;color:#7c826f;margin:15px 0 8px}.scenario-buttons{display:flex;flex-wrap:wrap;gap:6px}.scenario-buttons button{border:1px solid #dce1cf;background:white;border-radius:6px;font-size:11px;padding:7px}.scenario-buttons button.active{background:#ecf6d5;border-color:#8ca759}.setup-foot{color:#929987;font:400 19px/1.5 'Space Grotesk';margin-top:34px;letter-spacing:-.5px}.result-heading{display:flex;justify-content:space-between;align-items:center;min-height:28px;margin-bottom:13px}.badge{font-size:10px;letter-spacing:1px;font-weight:700;background:#e9efdf;color:#53643c;padding:6px 9px;border-radius:5px}.updated{font-size:12px;color:#7f8774;margin-left:10px}.refresh{border:0;background:transparent;font-size:17px;display:flex;gap:7px;align-items:center}.refresh span{font-size:12px}.refresh:disabled{opacity:.5;cursor:wait}.mood-card{background:#d3f78a;border:1px solid #bddf77;border-radius:20px;padding:27px 32px 28px;position:relative;overflow:hidden}.mood-card.urgent{background:#ffd77a;border-color:#e4bc5f}.mood-card.missed{background:#e8e4fa;border-color:#d0c9ee}.mood-card.unavailable{background:#e9ede4;border-color:#d6ddcc}.mood-top{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:700;letter-spacing:1.5px}.mood-symbol{font:500 43px 'Space Grotesk';letter-spacing:-4px;transform:rotate(-10deg)}.mood-card h2{font:600 clamp(40px,5.3vw,70px)/1.05 'Space Grotesk';letter-spacing:-3px;margin:18px 0 14px;max-width:620px}.mood-card>p{font-size:16px;line-height:1.6;color:#526538;max-width:490px;min-height:50px}.mood-bottom{border-top:1px solid #b5d775;margin-top:29px;padding-top:22px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}.mood-bottom>div{display:flex;flex-direction:column;gap:8px}.mood-bottom span{font-size:10px;font-weight:700;letter-spacing:1.3px}.mood-bottom strong{font:500 31px 'Space Grotesk';letter-spacing:-1px}.mood-bottom .arrival-detail{text-align:right}.arrival-detail strong{font-size:22px}.departure-title{display:flex;justify-content:space-between;align-items:center;margin:29px 0 14px}.departure-title h2{font:600 20px 'Space Grotesk';letter-spacing:-.5px}.departure-title>span{font-size:12px;color:#8a917e}.departure{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:white;border:1px solid #e0e4d8;border-radius:11px;padding:16px;margin:9px 0}.departure.selected{border-color:#879f5e;background:#f4f8eb;box-shadow:inset 3px 0 #78944f}.route{min-width:44px;padding:7px 6px;background:#edf0e7;border-radius:6px;font:700 14px 'Space Grotesk';text-align:center}.route-info{flex:1;min-width:0}.route-info strong{display:block;font-size:14px;font-weight:500}.route-info small{display:block;color:#8a927e;font-size:11px;margin-top:5px}.eta{text-align:right;white-space:nowrap}.eta strong{font:600 20px 'Space Grotesk'}.eta small{display:block;font-size:10px;color:#738454;margin-top:5px}.data-note{font-size:11px;color:#89917d;line-height:1.7;margin:16px 2px}.empty{padding:24px;border:1px dashed #ccd3c0;border-radius:10px;color:#738064;font-size:14px;line-height:1.7}footer{display:flex;justify-content:space-between;border-top:1px solid #dde2d3;margin-top:40px;padding:25px 0;color:#969d8b;font-size:11px}footer strong{color:#606b52}footer button{background:none;border:0;color:#77836a;font-size:11px}dialog{border:1px solid #d6dfc6;border-radius:18px;padding:36px;max-width:540px;width:90%;color:#2a3323}dialog::backdrop{background:#1c241c88;backdrop-filter:blur(4px)}dialog h2{font:600 30px 'Space Grotesk';margin:17px 0}dialog p{font-size:15px;line-height:1.7;margin:16px 0;color:#646e59}.dialog-close{position:absolute;right:12px;top:10px;background:none;border:0;font-size:26px}@media(min-width:1400px){.shell{padding:0 36px}.intro{margin-top:55px}.workspace{grid-template-columns:340px 1fr}}@media(max-width:850px){.shell{padding:0 24px}.workspace{grid-template-columns:265px 1fr;gap:20px}.trip-panel{padding:20px}.mood-card{padding:24px}.mood-card h2{font-size:46px;letter-spacing:-2px}.updated{display:block;margin:8px 0 0}.header-note{display:none}.icon-button{margin-left:auto}.local-time{display:none}}@media(max-width:640px){.shell{padding:0 18px}header{height:76px}.intro{margin:29px 0 20px}h1{font-size:32px;letter-spacing:-1.3px}.eyebrow{font-size:9px}nav{margin-bottom:22px;gap:7px}nav button{padding:10px 14px}.workspace{grid-template-columns:1fr;gap:23px}.trip-panel{padding:20px}.trip-panel h2{margin:12px 0 18px}.stop-detail{margin-bottom:20px}.buffer,.setup-foot{display:none}.mode-row{margin-top:15px;padding-top:14px}.mood-card h2{font-size:52px}.mood-card>p{font-size:15px}.mood-bottom{margin-top:22px}.departure{padding:14px}.updated{display:inline;margin-left:8px;font-size:11px}footer{gap:20px;line-height:1.6}footer button{max-width:140px;text-align:right}}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+:root {
+  font-family: "DM Sans", sans-serif;
+  color: #222623;
+  background: #f7f8f5;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input,
+select {
+  font: inherit;
+}
+button,
+a,
+input,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  cursor: pointer;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid #547928;
+  outline-offset: 4px;
+}
+button {
+  color: inherit;
+}
+a {
+  color: inherit;
+}
+.shell {
+  max-width: 1320px;
+  margin: auto;
+  padding: 0 52px;
+}
+header {
+  height: 98px;
+  border-bottom: 1px solid #dedfd9;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  font:
+    700 26px "Space Grotesk",
+    sans-serif;
+  letter-spacing: -1.3px;
+}
+.brand-icon {
+  background: #cdf564;
+  border: 1.5px solid #252a23;
+  border-radius: 12px;
+  width: 39px;
+  height: 39px;
+  text-align: center;
+  line-height: 34px;
+  font-size: 32px;
+}
+.beta {
+  font: 600 10px "DM Sans";
+  letter-spacing: 1px;
+  border: 1px solid #c9cec1;
+  padding: 4px 6px;
+  border-radius: 4px;
+  margin: 0 0 10px 5px;
+}
+.header-note {
+  margin-left: auto;
+  color: #73786e;
+  font-size: 14px;
+}
+.icon-button {
+  border: 1px solid #cbd0c5;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  background: transparent;
+  font-size: 15px;
+  margin-left: 18px;
+}
+.intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 47px 0 30px;
+}
+.eyebrow,
+.section-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #717769;
+}
+h1,
+h2,
+p {
+  margin: 0;
+}
+h1 {
+  font:
+    600 clamp(28px, 3.1vw, 43px)/1.2 "Space Grotesk",
+    sans-serif;
+  letter-spacing: -1.9px;
+  margin: 12px 0;
+}
+.intro p {
+  color: #777c73;
+  font-size: 16px;
+}
+.local-time {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.local-time > span:first-child {
+  font: 500 30px "Space Grotesk";
+  letter-spacing: -1px;
+}
+.local-time > span:last-child {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  color: #7a8073;
+}
+nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 32px;
+  overflow: auto;
+  padding: 4px 0;
+}
+nav button {
+  white-space: nowrap;
+  border: 1px solid #dce0d5;
+  background: #fff;
+  padding: 11px 19px;
+  border-radius: 30px;
+  font-size: 14px;
+}
+nav button.active {
+  background: #242b22;
+  color: white;
+  border-color: #242b22;
+}
+nav button span {
+  font-size: 10px;
+  opacity: 0.6;
+  margin-left: 8px;
+}
+nav button:hover {
+  border-color: #77856b;
+}
+.workspace {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 30px;
+  align-items: start;
+}
+.trip-panel {
+  border: 1px solid #dce0d5;
+  border-radius: 18px;
+  background: white;
+  padding: 26px;
+}
+.section-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+}
+.trip-panel h2 {
+  font: 600 24px "Space Grotesk";
+  letter-spacing: -0.8px;
+  margin: 21px 0 27px;
+}
+label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+select {
+  border: 1px solid #d8ddcf;
+  background: #fafbf8;
+  width: 100%;
+  border-radius: 9px;
+  padding: 13px 10px;
+  color: #343a2c;
+  font-size: 14px;
+}
+.stop-detail {
+  color: #818777;
+  font-size: 12px;
+  margin: 9px 0 32px;
+}
+.walk-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.walk-label strong {
+  font-size: 13px;
+  background: #f0f4e8;
+  padding: 5px 8px;
+  border-radius: 5px;
+}
+input[type="range"] {
+  width: 100%;
+  accent-color: #657948;
+  margin: 12px 0;
+}
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #818777;
+}
+.buffer {
+  display: flex;
+  gap: 10px;
+  background: #f6f8f0;
+  border-radius: 10px;
+  padding: 14px 12px;
+  margin-top: 25px;
+}
+.buffer > span {
+  font-size: 24px;
+  color: #647447;
+}
+.buffer strong {
+  font-size: 12px;
+}
+.buffer p {
+  font-size: 12px;
+  line-height: 1.65;
+  color: #7b826f;
+  margin-top: 5px;
+}
+.mode-row {
+  border-top: 1px solid #e7eadf;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 24px;
+  margin-top: 24px;
+}
+.mode-row label {
+  margin: 0;
+  font-size: 13px;
+}
+input[type="checkbox"] {
+  appearance: none;
+  width: 34px;
+  height: 20px;
+  background: #d5dacd;
+  border-radius: 15px;
+  position: relative;
+  cursor: pointer;
+}
+input[type="checkbox"]:before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  transition: 0.2s;
+}
+input[type="checkbox"]:checked {
+  background: #5d742d;
+}
+input[type="checkbox"]:checked:before {
+  left: 17px;
+}
+.small {
+  font-size: 12px;
+  color: #7c826f;
+  margin: 15px 0 8px;
+}
+.scenario-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.scenario-buttons button {
+  border: 1px solid #dce1cf;
+  background: white;
+  border-radius: 6px;
+  font-size: 11px;
+  padding: 7px;
+}
+.scenario-buttons button.active {
+  background: #ecf6d5;
+  border-color: #8ca759;
+}
+.setup-foot {
+  color: #929987;
+  font: 400 19px/1.5 "Space Grotesk";
+  margin-top: 34px;
+  letter-spacing: -0.5px;
+}
+.result-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 28px;
+  margin-bottom: 13px;
+}
+.badge {
+  font-size: 10px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  background: #e9efdf;
+  color: #53643c;
+  padding: 6px 9px;
+  border-radius: 5px;
+}
+.updated {
+  font-size: 12px;
+  color: #7f8774;
+  margin-left: 10px;
+}
+.refresh {
+  border: 0;
+  background: transparent;
+  font-size: 17px;
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+.refresh span {
+  font-size: 12px;
+}
+.refresh:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.mood-card {
+  background: #d3f78a;
+  border: 1px solid #bddf77;
+  border-radius: 20px;
+  padding: 27px 32px 28px;
+  position: relative;
+  overflow: hidden;
+}
+.mood-card.urgent {
+  background: #ffd77a;
+  border-color: #e4bc5f;
+}
+.mood-card.missed {
+  background: #e8e4fa;
+  border-color: #d0c9ee;
+}
+.mood-card.unavailable {
+  background: #e9ede4;
+  border-color: #d6ddcc;
+}
+.mood-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+.mood-symbol {
+  font: 500 43px "Space Grotesk";
+  letter-spacing: -4px;
+  transform: rotate(-10deg);
+}
+.mood-card h2 {
+  font: 600 clamp(40px, 5.3vw, 70px)/1.05 "Space Grotesk";
+  letter-spacing: -3px;
+  margin: 18px 0 14px;
+  max-width: 620px;
+}
+.mood-card > p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #526538;
+  max-width: 490px;
+  min-height: 50px;
+}
+.mood-bottom {
+  border-top: 1px solid #b5d775;
+  margin-top: 29px;
+  padding-top: 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 10px;
+}
+.mood-bottom > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mood-bottom span {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.3px;
+}
+.mood-bottom strong {
+  font: 500 31px "Space Grotesk";
+  letter-spacing: -1px;
+}
+.mood-bottom .arrival-detail {
+  text-align: right;
+}
+.arrival-detail strong {
+  font-size: 22px;
+}
+.departure-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 29px 0 14px;
+}
+.departure-title h2 {
+  font: 600 20px "Space Grotesk";
+  letter-spacing: -0.5px;
+}
+.departure-title > span {
+  font-size: 12px;
+  color: #8a917e;
+}
+.departure {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  background: white;
+  border: 1px solid #e0e4d8;
+  border-radius: 11px;
+  padding: 16px;
+  margin: 9px 0;
+}
+.departure.selected {
+  border-color: #879f5e;
+  background: #f4f8eb;
+  box-shadow: inset 3px 0 #78944f;
+}
+.route {
+  min-width: 44px;
+  padding: 7px 6px;
+  background: #edf0e7;
+  border-radius: 6px;
+  font: 700 14px "Space Grotesk";
+  text-align: center;
+}
+.route-info {
+  flex: 1;
+  min-width: 0;
+}
+.route-info strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+}
+.route-info small {
+  display: block;
+  color: #8a927e;
+  font-size: 11px;
+  margin-top: 5px;
+}
+.eta {
+  text-align: right;
+  white-space: nowrap;
+}
+.eta strong {
+  font: 600 20px "Space Grotesk";
+}
+.eta small {
+  display: block;
+  font-size: 10px;
+  color: #738454;
+  margin-top: 5px;
+}
+.data-note {
+  font-size: 11px;
+  color: #89917d;
+  line-height: 1.7;
+  margin: 16px 2px;
+}
+.empty {
+  padding: 24px;
+  border: 1px dashed #ccd3c0;
+  border-radius: 10px;
+  color: #738064;
+  font-size: 14px;
+  line-height: 1.7;
+}
+footer {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #dde2d3;
+  margin-top: 40px;
+  padding: 25px 0;
+  color: #969d8b;
+  font-size: 11px;
+}
+footer strong {
+  color: #606b52;
+}
+footer button {
+  background: none;
+  border: 0;
+  color: #77836a;
+  font-size: 11px;
+}
+dialog {
+  border: 1px solid #d6dfc6;
+  border-radius: 18px;
+  padding: 36px;
+  max-width: 540px;
+  width: 90%;
+  color: #2a3323;
+}
+dialog::backdrop {
+  background: #1c241c88;
+  backdrop-filter: blur(4px);
+}
+dialog h2 {
+  font: 600 30px "Space Grotesk";
+  margin: 17px 0;
+}
+dialog p {
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 16px 0;
+  color: #646e59;
+}
+.dialog-close {
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  background: none;
+  border: 0;
+  font-size: 26px;
+}
+@media (min-width: 1400px) {
+  .shell {
+    padding: 0 36px;
+  }
+  .intro {
+    margin-top: 55px;
+  }
+  .workspace {
+    grid-template-columns: 340px 1fr;
+  }
+}
+@media (max-width: 850px) {
+  .shell {
+    padding: 0 24px;
+  }
+  .workspace {
+    grid-template-columns: 265px 1fr;
+    gap: 20px;
+  }
+  .trip-panel {
+    padding: 20px;
+  }
+  .mood-card {
+    padding: 24px;
+  }
+  .mood-card h2 {
+    font-size: 46px;
+    letter-spacing: -2px;
+  }
+  .updated {
+    display: block;
+    margin: 8px 0 0;
+  }
+  .header-note {
+    display: none;
+  }
+  .icon-button {
+    margin-left: auto;
+  }
+  .local-time {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
+  .shell {
+    padding: 0 18px;
+  }
+  header {
+    height: 76px;
+  }
+  .intro {
+    margin: 29px 0 20px;
+  }
+  h1 {
+    font-size: 32px;
+    letter-spacing: -1.3px;
+  }
+  .eyebrow {
+    font-size: 9px;
+  }
+  nav {
+    margin-bottom: 22px;
+    gap: 7px;
+  }
+  nav button {
+    padding: 10px 14px;
+  }
+  .workspace {
+    grid-template-columns: 1fr;
+    gap: 23px;
+  }
+  .trip-panel {
+    padding: 20px;
+  }
+  .trip-panel h2 {
+    margin: 12px 0 18px;
+  }
+  .stop-detail {
+    margin-bottom: 20px;
+  }
+  .buffer,
+  .setup-foot {
+    display: none;
+  }
+  .mode-row {
+    margin-top: 15px;
+    padding-top: 14px;
+  }
+  .mood-card h2 {
+    font-size: 52px;
+  }
+  .mood-card > p {
+    font-size: 15px;
+  }
+  .mood-bottom {
+    margin-top: 22px;
+  }
+  .departure {
+    padding: 14px;
+  }
+  .updated {
+    display: inline;
+    margin-left: 8px;
+    font-size: 11px;
+  }
+  footer {
+    gap: 20px;
+    line-height: 1.6;
+  }
+  footer button {
+    max-width: 140px;
+    text-align: right;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
