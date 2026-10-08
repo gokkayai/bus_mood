@@ -58,6 +58,9 @@ const state = {
   demo: false,
   scenario: "late",
   walk: 5,
+  confidence: 0.95,
+  busUncertainty: 2,
+  walkUncertainty: 1,
   rows: [],
   selected: null,
   loading: false,
@@ -84,6 +87,21 @@ function cityTime(date) {
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
+}
+const confidenceQuantiles = {
+  0.9: 1.2815515655446004,
+  0.95: 1.6448536269514722,
+  0.99: 2.3263478740408408,
+};
+function uncertaintyMargin() {
+  const combinedStandardDeviation = Math.hypot(
+    state.busUncertainty,
+    state.walkUncertainty,
+  );
+  return confidenceQuantiles[state.confidence] * combinedStandardDeviation;
+}
+function latestSafeDeparture(row) {
+  return row.arrival - (state.walk + uncertaintyMargin()) * 60000;
 }
 function setCity(id) {
   if (!cities[id]) throw Error("Unknown city");
@@ -183,7 +201,7 @@ async function load() {
 }
 function advice(row, now = Date.now()) {
   const minutes = (row.arrival - now) / 60000,
-    left = minutes - state.walk - 1;
+    left = (latestSafeDeparture(row) - now) / 60000;
   if (minutes <= 0)
     return {
       title: "That ship has sailed.",
@@ -244,6 +262,13 @@ function render() {
   text("clock", cityTime(new Date()));
   text("timezone", c.name.toUpperCase() + " LOCAL TIME");
   text("walkValue", state.walk);
+  text("busUncertaintyValue", state.busUncertainty);
+  text("walkUncertaintyValue", state.walkUncertainty);
+  text("confidenceBadge", `${Math.round(state.confidence * 100)}%`);
+  text(
+    "probabilitySummary",
+    `Adds a ${uncertaintyMargin().toFixed(1)} min uncertainty margin to your ${state.walk} min walk.`,
+  );
   text("stopDetail", c.stops.find((s) => s[0] === $("stop").value)?.[2] || "");
   $("scenarios").hidden = !state.demo;
   document.querySelectorAll("[data-scenario]").forEach((b) => {
@@ -297,6 +322,16 @@ function render() {
   text("moodSymbol", a.symbol);
   text("leaveTime", a.leave);
   text("leaveLabel", a.leave === "Now" ? "LEAVE" : "LEAVE IN");
+  text(
+    "confidenceResult",
+    `${Math.round(state.confidence * 100)}% CATCH TARGET`,
+  );
+  text(
+    "marginResult",
+    row
+      ? `${uncertaintyMargin().toFixed(1)} MIN UNCERTAINTY MARGIN · LEAVE BY ${cityTime(new Date(latestSafeDeparture(row)))}`
+      : `${uncertaintyMargin().toFixed(1)} MIN UNCERTAINTY MARGIN`,
+  );
   text("selectedRoute", row ? `BUS ${row.line} · EXPECTED` : "YOUR NEXT RIDE");
   text("arrivalTime", row ? cityTime(new Date(row.arrival)) : "—");
   $("departures").innerHTML = state.rows.length
@@ -310,8 +345,8 @@ function render() {
   text(
     "dataNote",
     state.demo
-      ? "Demo mode · Fictional routes, timings and delays for exploring the app. Not for travel planning."
-      : `Powered by Transport for London open data · Refreshes every 30 sec. ${state.updated && Date.now() - state.updated > 60000 ? "Predictions may be stale. " : ""}Leave times include your ${state.walk} min walk + 1 min buffer.`,
+      ? `Demo mode · Fictional routes and timings. The ${Math.round(state.confidence * 100)}% plan uses a ${uncertaintyMargin().toFixed(1)} min uncertainty margin. Not for travel planning.`
+      : `Powered by Transport for London open data · Refreshes every 30 sec. ${state.updated && Date.now() - state.updated > 60000 ? "Predictions may be stale. " : ""}The ${Math.round(state.confidence * 100)}% plan includes your ${state.walk} min walk + a ${uncertaintyMargin().toFixed(1)} min uncertainty margin.`,
   );
 }
 $("cities").addEventListener("click", (e) => {
@@ -321,6 +356,18 @@ $("cities").addEventListener("click", (e) => {
 $("stop").addEventListener("change", load);
 $("walk").addEventListener("input", (e) => {
   state.walk = Number(e.target.value);
+  render();
+});
+$("confidence").addEventListener("change", (e) => {
+  state.confidence = Number(e.target.value);
+  render();
+});
+$("busUncertainty").addEventListener("input", (e) => {
+  state.busUncertainty = Number(e.target.value);
+  render();
+});
+$("walkUncertainty").addEventListener("input", (e) => {
+  state.walkUncertainty = Number(e.target.value);
   render();
 });
 $("demo").addEventListener("change", (e) => {

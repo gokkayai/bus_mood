@@ -229,6 +229,37 @@ input[type="range"] {
   font-size: 11px;
   color: #818777;
 }
+.probability-controls {
+  border-top: 1px solid #e7eadf;
+  margin-top: 24px;
+  padding-top: 22px;
+}
+.probability-controls > label {
+  margin-bottom: 8px;
+}
+.uncertainty-settings {
+  margin-top: 14px;
+}
+.uncertainty-settings summary {
+  color: #69745f;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+.uncertainty-note {
+  color: #818777;
+  font-size: 11px;
+  line-height: 1.5;
+  margin: -4px 0 12px;
+}
+.uncertainty-settings .walk-label {
+  font-size: 12px;
+  margin-top: 12px;
+}
+.uncertainty-settings input[type="range"] {
+  margin: 3px 0 5px;
+}
 .buffer {
   display: flex;
   gap: 10px;
@@ -236,6 +267,17 @@ input[type="range"] {
   border-radius: 10px;
   padding: 14px 12px;
   margin-top: 25px;
+}
+.probability-buffer > span {
+  align-items: center;
+  background: #dff2ad;
+  border-radius: 50%;
+  display: flex;
+  flex: 0 0 46px;
+  font: 700 13px "Space Grotesk";
+  height: 46px;
+  justify-content: center;
+  letter-spacing: -0.3px;
 }
 .buffer > span {
   font-size: 24px;
@@ -396,6 +438,22 @@ input[type="checkbox"]:checked:before {
   color: #526538;
   max-width: 490px;
   min-height: 50px;
+}
+.confidence-result {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 18px;
+}
+.confidence-result span {
+  background: #ffffff66;
+  border: 1px solid #52653833;
+  border-radius: 20px;
+  color: #43552d;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 7px 10px;
 }
 .mood-bottom {
   border-top: 1px solid #b5d775;
@@ -635,7 +693,6 @@ dialog p {
   .stop-detail {
     margin-bottom: 20px;
   }
-  .buffer,
   .setup-foot {
     display: none;
   }

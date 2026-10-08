@@ -59,11 +59,54 @@
             <div class="range-labels">
               <span>Around the corner</span><span>A little trek</span>
             </div>
-            <div class="buffer">
-              <span>◷</span>
+            <div class="probability-controls">
+              <label for="confidence">Catch probability</label>
+              <select id="confidence">
+                <option value="0.9">90%</option>
+                <option value="0.95" selected>95%</option>
+                <option value="0.99">99%</option>
+              </select>
+              <details class="uncertainty-settings">
+                <summary>Adjust uncertainty</summary>
+                <p class="uncertainty-note">
+                  Typical variation (1 standard deviation), assuming independent
+                  normal errors.
+                </p>
+                <label for="busUncertainty" class="walk-label"
+                  >Bus prediction
+                  <strong
+                    >±<output id="busUncertaintyValue">2</output> min</strong
+                  ></label
+                ><input
+                  id="busUncertainty"
+                  type="range"
+                  min="0"
+                  max="5"
+                  step="0.5"
+                  value="2"
+                />
+                <label for="walkUncertainty" class="walk-label"
+                  >Walking time
+                  <strong
+                    >±<output id="walkUncertaintyValue">1</output> min</strong
+                  ></label
+                ><input
+                  id="walkUncertainty"
+                  type="range"
+                  min="0"
+                  max="3"
+                  step="0.5"
+                  value="1"
+                />
+              </details>
+            </div>
+            <div class="buffer probability-buffer">
+              <span id="confidenceBadge">95%</span>
               <div>
-                <strong>A minute to spare.</strong>
-                <p>We add a 1 min buffer. Your shoelaces deserve a moment.</p>
+                <strong>Probability-aware timing</strong>
+                <p id="probabilitySummary">
+                  Calculating your uncertainty margin…
+                </p>
               </div>
             </div>
             <div class="mode-row">
@@ -101,6 +144,10 @@
               </div>
               <h2 id="moodTitle">One moment.</h2>
               <p id="moodCopy">Asking your bus about its plans.</p>
+              <div class="confidence-result">
+                <span id="confidenceResult">95% CATCH TARGET</span>
+                <span id="marginResult">CALCULATING MARGIN…</span>
+              </div>
               <div class="mood-bottom">
                 <div>
                   <span id="leaveLabel">LEAVE IN</span
@@ -151,8 +198,11 @@
         available in demo mode.
       </p>
       <p>
-        Departure advice = arrival estimate − your walking time − a 1 minute
-        buffer. “RUN!” is a joke, not a reason to cross a road unsafely.
+        Departure advice uses uncertain bus arrivals and walking times. It picks
+        the latest departure whose estimated probability of catching the bus
+        meets your selected target under an independent normal-error model.
+        These probabilities depend on the assumptions you choose and are not
+        guarantees. “RUN!” is a joke, not a reason to cross a road unsafely.
       </p>
       <p>This app is not affiliated with Google Maps or any transit agency.</p>
     </dialog>
